@@ -108,6 +108,9 @@
             </select>
             <button>New Game</button>
             <div class="mineField"></div>
+            <p>Left click a square to start the game, and check if a cell contains a mine. Right click to plant or
+                remove a flag.</p>
+            <p>You win when every bomb has a flag.</p>
         </main>
         <script>
             let gridSize = 5;
@@ -276,6 +279,7 @@
                                 let cell = document.querySelector(`[data-coords='${"" + (coordX + x) + ',' + (coordY + y)}']`)
                                 if (cell) {
                                     cell.innerText = map["" + (coordX + x) + (coordY + y)].cell === 'x' ? 0 : map["" + (coordX + x) + (coordY + y)].cell
+                                    cell.removeEventListener('contextmenu', rclickCell)
                                 }
                                 if (map["" + (coordX + x) + (coordY + y)].cell === 'x')
                                     traverseGridMap([(coordX + x), (coordY + y)])
@@ -295,6 +299,7 @@
                     // reveal surrounding zeros
                     traverseGridMap(coords)
                 }
+                e.target.removeEventListener('contextmenu', rclickCell)
                 if (parseInt(e.target.getAttribute('data-bomb'))) {
                     document.querySelectorAll('.cell').forEach(cell => {
                         cell.innerText = parseInt(cell.getAttribute('data-bomb')) ? '💣' : cell.getAttribute('data-bombs')
@@ -327,8 +332,10 @@
             }
 
             function checkWin() {
-                const bombs = Object.keys(map).map(k => map[k]).filter(({ cell }) => cell === '*')
-                if (bombs.filter(cell => cell.flagged).length === bombs.length) {
+                const cells = Object.keys(map).map(k => map[k])
+                const bombs = cells.filter(({ cell }) => cell === '*')
+                const flags = cells.filter(cell => cell.flagged)
+                if (bombs.filter(cell => cell.flagged).length === bombs.length && flags.length === bombs.length ) {
                     document.querySelector('main').classList.add('winner')
                 }
             }
