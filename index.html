@@ -23,6 +23,7 @@
                 align-items: center;
                 transition: all .3s ease;
             }
+
             button {
                 margin-bottom: 32px;
                 padding: 8px 16px;
@@ -32,6 +33,7 @@
                 transition: all .3s ease;
 
             }
+
             button:hover {
                 background-color: #aaa;
             }
@@ -123,7 +125,6 @@
                         mineCount = 3;
                         break;
                     case 'medium':
-                        console.log('medium');
                         gridSize = 10;
                         mineCount = 15;
                         break;
@@ -135,13 +136,10 @@
                 document.documentElement.style.setProperty('--grid-size', gridSize)
 
                 map = {}
-                // grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, coords))
                 grid = genGrid(gridSize);
                 gameStarted = false
-                console.log(mineCount, gridSize);
                 drawGrid(grid, mineCount, gridSize)
             }
-            // document.documentElement.style.setProperty('--grid-size', gridSize)
 
             function genGrid(gridSize) {
                 let grid = [];
@@ -235,8 +233,6 @@
 
             let gameStarted = false;
 
-            // let grid = generateMinesweeper(gridSize, mines)
-            // let grid = genGrid(gridSize)
 
             let map;
 
@@ -311,7 +307,6 @@
 
             function rclickCell(e) {
                 e.preventDefault()
-                console.log(e.target);
                 let cell = e.target.innerText === '🚩' ? e.target.parentNode : e.target
                 const coords = cell.getAttribute('data-coords').split(',').join('')
                 map = { ...map, [coords]: { ...map[coords], flagged: !map[coords].flagged } }
