@@ -73,7 +73,7 @@
                 align-items: center;
                 transition: all .3s ease;
                 color: #fff;
-                font-size: 32px;
+                font-size: var(--font-size, 18px);
             }
 
             .cell:hover {
@@ -126,14 +126,17 @@
                     case 'easy':
                         gridSize = 5;
                         mineCount = 3;
+                        document.documentElement.style.setProperty('--font-size', '32px')
                         break;
                     case 'medium':
                         gridSize = 10;
                         mineCount = 15;
+                        document.documentElement.style.setProperty('--font-size', '26px')
                         break;
                     case 'hard':
                         gridSize = 15;
-                        mineCount = 30;
+                        mineCount = 25;
+                        document.documentElement.style.setProperty('--font-size', '18px')
                         break;
                 }
                 document.documentElement.style.setProperty('--grid-size', gridSize)
@@ -300,6 +303,10 @@
                     traverseGridMap(coords)
                 }
                 e.target.removeEventListener('contextmenu', rclickCell)
+                if (e.target.getAttribute('data-bombs') === '0') {
+                    let coords = e.target.getAttribute('data-coords').split(',').map(i => parseInt(i))
+                    traverseGridMap(coords)
+                }
                 if (parseInt(e.target.getAttribute('data-bomb'))) {
                     document.querySelectorAll('.cell').forEach(cell => {
                         cell.innerText = parseInt(cell.getAttribute('data-bomb')) ? '💣' : cell.getAttribute('data-bombs')
@@ -335,7 +342,7 @@
                 const cells = Object.keys(map).map(k => map[k])
                 const bombs = cells.filter(({ cell }) => cell === '*')
                 const flags = cells.filter(cell => cell.flagged)
-                if (bombs.filter(cell => cell.flagged).length === bombs.length && flags.length === bombs.length ) {
+                if (bombs.filter(cell => cell.flagged).length === bombs.length && flags.length === bombs.length) {
                     document.querySelector('main').classList.add('winner')
                 }
             }
