@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minesweeper</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            main {
+                height: 100vh;
+                width: 100vw;
+                background-color: lightblue;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: all .3s ease;
+            }
+            button {
+                margin-bottom: 32px;
+                padding: 8px 16px;
+                border: 1px solid gold;
+                border-radius: 16px;
+                background-color: #ccc;
+                transition: all .3s ease;
+
+            }
+            button:hover {
+                background-color: #aaa;
+            }
+
+            select {
+                margin-bottom: 32px;
+            }
+
+            .winner {
+                animation: win 3s linear;
+            }
+
+            .loser {
+                background-color: red;
+            }
+
+            @keyframes win {
+                to {
+                    filter: hue-rotate(1080deg);
+                }
+            }
+
+            .mineField {
+                width: 500px;
+                height: 500px;
+                display: grid;
+                grid-template-columns: repeat(var(--grid-size), 1fr);
+                gap: 2px;
+            }
+
+            .cell {
+                width: 100%;
+                height: 100%;
+                background-color: #444;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: all .3s ease;
+                color: #fff;
+                font-size: 32px;
+            }
+
+            .cell:hover {
+                background-color: #ccc;
+            }
+
+            .flag,
+            .flag:hover {
+                background-color: lightgreen;
+            }
+
+            .flag span {
+                animation: popFlag .3s cubic-bezier(0.19, 1, 0.22, 1);
+            }
+
+
+
+            @keyframes popFlag {
+                from {
+                    transform: translateY(-5px);
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <main>
+            <select name="difficulty" id="difficulty">
+                <option selected value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <button>New Game</button>
+            <div class="mineField"></div>
+        </main>
+        <script>
+            let gridSize = 5;
+            let mineCount = 3;
+
+            const diff = document.querySelector('#difficulty')
+
+            document.querySelector('button').addEventListener('click', newGame)
+
+            function newGame() {
+                document.querySelector('main').classList.remove('loser', 'winner')
+                switch (diff.value) {
+                    case 'easy':
+                        gridSize = 5;
+                        mineCount = 3;
+                        break;
+                    case 'medium':
+                        console.log('medium');
+                        gridSize = 10;
+                        mineCount = 15;
+                        break;
+                    case 'hard':
+                        gridSize = 15;
+                        mineCount = 30;
+                        break;
+                }
+                document.documentElement.style.setProperty('--grid-size', gridSize)
+
+                map = {}
+                // grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, coords))
+                grid = genGrid(gridSize);
+                gameStarted = false
+                console.log(mineCount, gridSize);
+                drawGrid(grid, mineCount, gridSize)
+            }
+            // document.documentElement.style.setProperty('--grid-size', gridSize)
+
+            function genGrid(gridSize) {
+                let grid = [];
+                for (let i = 0; i < gridSize; i++) {
+                    let row = []
+                    for (let j = 0; j < gridSize; j++) {
+                        row.push('')
+                    }
+                    grid.push(row)
+                }
+                return grid
+            }
+            function genMines(gridSize, mineCount, coords) {
+                let mines = [];
+                let cX = coords[0]
+                let cY = coords[1]
+                while (mineCount > 0) {
+                    let randX = Math.floor(Math.random() * (gridSize)) + 1
+                    let randY = Math.floor(Math.random() * (gridSize)) + 1
+                    // make sure coords is a zero
+                    // this probably has a much simpler refactored syntax...
+                    if ((cX !== randX && cY !== randY)) { // x, y is not bomb spot
+                        if (cX - 1 !== randX && cY - 1 !== randY)
+                            if (cX - 1 !== randX && cY !== randY)
+                                if (cX !== randX && cY - 1 !== randY)
+                                    if (cX + 1 !== randX && cY + 1 !== randY)
+                                        if (cX !== randX && cY + 1 !== randY)
+                                            if (cX + 1 !== randX && cY !== randY)
+                                                if (!mines.map(m => m.join('')).includes('' + (randX) + (randY))) {
+                                                    mines.push([randX, randY])
+                                                    mineCount--
+                                                }
+                    }
+                }
+                return mines
+            }
+
+            function toGridMap(grid) {
+                let map = {};
+                grid.forEach((row, y) => {
+                    row.forEach((cell, x) => {
+                        map["" + (x + 1) + (y + 1)] = { checked: false, flagged: false, cell }
+                    })
+                })
+                return map
+            }
+
+            function generateMinesweeper(gridSize, mines) {
+                const genGrid = (gridSize) => {
+                    let grid = [];
+                    for (let i = 0; i < gridSize; i++) {
+                        let row = [];
+                        for (let j = 0; j < gridSize; j++) {
+                            let isMine = mines.filter((m) => m.join("") === "" + (j + 1) + (i + 1)).length;
+                            if (isMine) row.push("*");
+                            else row.push("x");
+                        }
+                        grid.push(row);
+                    }
+                    return grid;
+                };
+
+                const gridToString = (grid) => grid.map((row) => row.join("")).join("\n");
+
+                const grid = genGrid(gridSize);
+
+                grid.forEach((row, y) => {
+                    row.forEach((cell, x) => {
+                        if (cell === "*") {
+                            [-1, 0, 1].forEach((offsetX) => {
+                                [-1, 0, 1].forEach((offsetY) => {
+                                    if (grid[y + offsetY]) {
+                                        if (grid[y + offsetY][x + offsetX]) {
+                                            if (grid[y + offsetY][x + offsetX] === "x") {
+                                                grid[y + offsetY][x + offsetX] = 1;
+                                            } else if (grid[y + offsetY][x + offsetX] !== '*') {
+                                                grid[y + offsetY][x + offsetX] += 1;
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    });
+                });
+
+                return grid
+            }
+
+            const minefield = document.querySelector('.mineField')
+
+            let gameStarted = false;
+
+            // let grid = generateMinesweeper(gridSize, mines)
+            // let grid = genGrid(gridSize)
+
+            let map;
+
+
+            function drawGrid(grid, mineCount, gridSize) {
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.remove()
+                })
+                grid.forEach((row, y) => {
+                    row.forEach((cell, x) => {
+                        const el = document.createElement('div')
+                        if (cell === '*') {
+                            el.setAttribute('data-bomb', 1)
+                        } else {
+                            el.setAttribute('data-bombs', cell === 'x' ? 0 : cell)
+
+                            el.setAttribute('data-bomb', 0)
+                        }
+                        el.setAttribute('data-coords', [x + 1, y + 1])
+                        el.setAttribute('data-flag', 0)
+                        el.classList.add('cell')
+                        minefield.appendChild(el)
+                    })
+                })
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.addEventListener('click', clickCell)
+                    cell.addEventListener('contextmenu', rclickCell)
+                })
+            }
+
+            function traverseGridMap(coords) {
+                let offset = [-1, 0, 1];
+                let coordX = coords[0]
+                let coordY = coords[1]
+                offset.forEach(x => {
+                    offset.forEach(y => {
+                        // make sure cell is in gridMap
+                        if (map["" + (coordX + x) + (coordY + y)]) {
+                            if (!map["" + (coordX + x) + (coordY + y)].checked && map["" + (coordX + x) + (coordY + y)].cell !== '*') {
+                                map = { ...map, ["" + (coordX + x) + (coordY + y)]: { ...map[["" + (coordX + x) + (coordY + y)]], checked: true } }
+                                let cell = document.querySelector(`[data-coords='${"" + (coordX + x) + ',' + (coordY + y)}']`)
+                                if (cell) {
+                                    cell.innerText = map["" + (coordX + x) + (coordY + y)].cell === 'x' ? 0 : map["" + (coordX + x) + (coordY + y)].cell
+                                }
+                                if (map["" + (coordX + x) + (coordY + y)].cell === 'x')
+                                    traverseGridMap([(coordX + x), (coordY + y)])
+                            }
+                        }
+                    })
+                })
+            }
+
+            function clickCell(e) {
+                if (!gameStarted) {
+                    let coords = e.target.getAttribute('data-coords').split(',').map(i => parseInt(i))
+                    grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, coords))
+                    drawGrid(grid)
+                    map = toGridMap(grid)
+                    gameStarted = true
+                    // reveal surrounding zeros
+                    traverseGridMap(coords)
+                }
+                if (parseInt(e.target.getAttribute('data-bomb'))) {
+                    document.querySelectorAll('.cell').forEach(cell => {
+                        cell.innerText = parseInt(cell.getAttribute('data-bomb')) ? '💣' : cell.getAttribute('data-bombs')
+                        document.querySelector('main').classList.add('loser')
+                    })
+                } else {
+                    e.target.innerText = e.target.getAttribute('data-bombs')
+                }
+            }
+
+            function rclickCell(e) {
+                e.preventDefault()
+                console.log(e.target);
+                let cell = e.target.innerText === '🚩' ? e.target.parentNode : e.target
+                const coords = cell.getAttribute('data-coords').split(',').join('')
+                map = { ...map, [coords]: { ...map[coords], flagged: !map[coords].flagged } }
+
+                if (parseInt(cell.getAttribute('data-flag'))) {
+                    cell.setAttribute('data-flag', 0)
+                    cell.addEventListener('click', clickCell)
+                    cell.innerHTML = '<span></span>'
+                    cell.classList.remove('flag')
+                } else {
+                    cell.setAttribute('data-flag', 1)
+                    cell.innerHTML = '<span>🚩</span>'
+                    cell.removeEventListener('click', clickCell)
+                    cell.classList.add('flag')
+                }
+                checkWin()
+                return false
+            }
+
+            function checkWin() {
+                const bombs = Object.keys(map).map(k => map[k]).filter(({ cell }) => cell === '*')
+                if (bombs.filter(cell => cell.flagged).length === bombs.length) {
+                    document.querySelector('main').classList.add('winner')
+                }
+            }
+
+            newGame();
+        </script>
+    </body>
+
+</html>
