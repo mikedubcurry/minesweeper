@@ -192,6 +192,9 @@
 
             function newGame() {
                 document.querySelector('main').classList.remove('loser', 'winner')
+                bombTouch = true;
+                document.querySelector('.touchType').classList.remove('on')
+                document.querySelector('#touchType').checked = false
                 switch (diff.value) {
                     case 'easy':
                         gridSize = 5;
