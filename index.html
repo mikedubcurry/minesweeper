@@ -95,32 +95,12 @@
             }
 
 
-            @keyframes popFlag {
-                from {
-                    transform: translateY(-5px);
-                }
-            }
-
-            @media screen and (min-width: 500px) {
-                .mineField {
-                    width: 500px;
-                    height: 500px;
-                }
-
-                #desktop-help {
-                    display: block;
-                }
-
-                #mobile-help {
-                    display: none;
-                }
-            }
-
             .touchTypeContainer {
                 width: 120px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                /* display: none; */
             }
 
             .touchType {
@@ -151,6 +131,31 @@
 
             #touchType {
                 visibility: hidden;
+            }
+
+            @keyframes popFlag {
+                from {
+                    transform: translateY(-5px);
+                }
+            }
+
+            @media screen and (min-width: 500px) {
+                .mineField {
+                    width: 500px;
+                    height: 500px;
+                }
+
+                #desktop-help {
+                    display: block;
+                }
+
+                #mobile-help {
+                    display: none;
+                }
+
+                .touchTypeContainer {
+                    display: none;
+                }
             }
         </style>
     </head>
