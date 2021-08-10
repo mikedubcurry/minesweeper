@@ -92,6 +92,7 @@
 
             p {
                 padding: 0 16px;
+                text-align: center;
             }
 
 
@@ -101,6 +102,10 @@
                 justify-content: space-between;
                 align-items: center;
                 /* display: none; */
+            }
+
+            .touchTypeContainer.disabled {
+                filter: grayscale(150%);
             }
 
             .touchType {
@@ -168,12 +173,12 @@
                 <option value="hard">Hard</option>
             </select>
             <button>New Game</button>
-            <div class="touchTypeContainer">
+            <div class="touchTypeContainer disabled">
                 💣
 
                 <label class="touchType">
                     <span class="switch"></span>
-                    <input type="checkbox" name="touchType" id="touchType">
+                    <input disabled type="checkbox" name="touchType" id="touchType">
                 </label>
                 🚩
 
@@ -184,6 +189,7 @@
                 to plant or
                 remove a flag.</p>
             <p>You win when every bomb has a flag.</p>
+            <a href="https://mikecurry.dev">Check out my site while you're at it!</a>
         </main>
         <script>
             let gridSize = 5;
@@ -192,9 +198,11 @@
             const diff = document.querySelector('#difficulty')
 
             document.querySelector('button').addEventListener('click', newGame)
-            document.querySelector('.touchTypeContainer').addEventListener('click', toggleTouchType)
+            // document.querySelector('.touchTypeContainer').addEventListener('click', toggleTouchType)
 
             function newGame() {
+                document.querySelector('.touchTypeContainer').removeEventListener('click', toggleTouchType)
+                document.querySelector('.touchTypeContainer').classList.add('disabled')
                 document.querySelector('main').classList.remove('loser', 'winner')
                 bombTouch = true;
                 document.querySelector('.touchType').classList.remove('on')
@@ -369,6 +377,8 @@
 
             function clickCell(e) {
                 if (!gameStarted) {
+                    document.querySelector('.touchTypeContainer').addEventListener('click', toggleTouchType)
+                    document.querySelector('.touchTypeContainer').classList.remove('disabled')
                     let coords = e.target.getAttribute('data-coords').split(',').map(i => parseInt(i))
                     grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, coords))
                     drawGrid(grid)
@@ -397,16 +407,12 @@
                     map = { ...map, [coords]: { ...map[coords], flagged: !map[coords].flagged } }
 
                     if (parseInt(cell.getAttribute('data-flag'))) {
-                        console.log('clicking flag');
                         cell.setAttribute('data-flag', 0)
-                        // cell.addEventListener('click', clickCell)
                         cell.innerHTML = '<span></span>'
                         cell.classList.remove('flag')
                     } else {
-                        console.log('planting flag');
                         cell.setAttribute('data-flag', 1)
                         cell.innerHTML = '<span>🚩</span>'
-                        // cell.removeEventListener('click', clickCell)
                         cell.classList.add('flag')
                     }
                     checkWin()
