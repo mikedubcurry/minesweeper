@@ -19,13 +19,13 @@
                 background-color: lightblue;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: space-evenly;
                 align-items: center;
                 transition: all .3s ease;
             }
 
             button {
-                margin-bottom: 32px;
+                /* margin-bottom: 32px; */
                 padding: 8px 16px;
                 border: 1px solid gold;
                 border-radius: 16px;
@@ -39,7 +39,7 @@
             }
 
             select {
-                margin-bottom: 32px;
+                /* margin-bottom: 32px; */
             }
 
             .winner {
@@ -57,11 +57,12 @@
             }
 
             .mineField {
-                width: 500px;
-                height: 500px;
+                width: calc(100vw - 16px);
+                height: calc(100vw - 16px);
                 display: grid;
                 grid-template-columns: repeat(var(--grid-size), 1fr);
                 gap: 2px;
+                margin: 16px;
             }
 
             .cell {
@@ -88,12 +89,31 @@
             .flag span {
                 animation: popFlag .3s cubic-bezier(0.19, 1, 0.22, 1);
             }
+            #desktop-help {
+                display: none;
+            }
 
+            p {
+                padding: 0 16px;
+            }
 
 
             @keyframes popFlag {
                 from {
                     transform: translateY(-5px);
+                }
+            }
+
+            @media screen and (min-width: 500px) {
+                .mineField {
+                    width: 500px;
+                    height: 500px;
+                }
+                #desktop-help {
+                display: block;
+            }
+                #mobile-help {
+                    display: none;
                 }
             }
         </style>
@@ -108,7 +128,9 @@
             </select>
             <button>New Game</button>
             <div class="mineField"></div>
-            <p>Left click a square to start the game, and check if a cell contains a mine. Right click to plant or
+            <p id="mobile-help">For mobile, a quick tap checks the cell for a
+                bomb, a long press plants a flag.</p>
+            <p id="desktop-help">Left click a square to start the game, and check if a cell contains a mine. Right click to plant or
                 remove a flag.</p>
             <p>You win when every bomb has a flag.</p>
         </main>
