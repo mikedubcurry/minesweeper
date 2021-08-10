@@ -38,10 +38,6 @@
                 background-color: #aaa;
             }
 
-            select {
-                /* margin-bottom: 32px; */
-            }
-
             .winner {
                 animation: win 3s linear;
             }
@@ -89,6 +85,7 @@
             .flag span {
                 animation: popFlag .3s cubic-bezier(0.19, 1, 0.22, 1);
             }
+
             #desktop-help {
                 display: none;
             }
@@ -109,12 +106,51 @@
                     width: 500px;
                     height: 500px;
                 }
+
                 #desktop-help {
-                display: block;
-            }
+                    display: block;
+                }
+
                 #mobile-help {
                     display: none;
                 }
+            }
+
+            .touchTypeContainer {
+                width: 120px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .touchType {
+                width: 60px;
+                height: 30px;
+                border-radius: 30px;
+                background-color: darkslateblue;
+                display: inline;
+                position: relative;
+                font-size: 16px;
+            }
+
+            .switch {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background-color: darkturquoise;
+                position: absolute;
+                top: 0;
+                left: 0;
+                transition: left .3s ease;
+                display: inline-block;
+            }
+
+            .on>.switch {
+                left: 30px;
+            }
+
+            #touchType {
+                visibility: hidden;
             }
         </style>
     </head>
@@ -127,20 +163,32 @@
                 <option value="hard">Hard</option>
             </select>
             <button>New Game</button>
+            <div class="touchTypeContainer">
+                💣
+
+                <label class="touchType">
+                    <span class="switch"></span>
+                    <input type="checkbox" name="touchType" id="touchType">
+                </label>
+                🚩
+
+            </div>
             <div class="mineField"></div>
             <p id="mobile-help">For mobile, a quick tap checks the cell for a
                 bomb, a long press plants a flag.</p>
-            <p id="desktop-help">Left click a square to start the game, and check if a cell contains a mine. Right click to plant or
+            <p id="desktop-help">Left click a square to start the game, and check if a cell contains a mine. Right click
+                to plant or
                 remove a flag.</p>
             <p>You win when every bomb has a flag.</p>
         </main>
         <script>
             let gridSize = 5;
             let mineCount = 3;
-
+            let bombTouch = true;
             const diff = document.querySelector('#difficulty')
 
             document.querySelector('button').addEventListener('click', newGame)
+            document.querySelector('.touchTypeContainer').addEventListener('click', toggleTouchType)
 
             function newGame() {
                 document.querySelector('main').classList.remove('loser', 'winner')
@@ -229,8 +277,6 @@
                     }
                     return grid;
                 };
-
-                const gridToString = (grid) => grid.map((row) => row.join("")).join("\n");
 
                 const grid = genGrid(gridSize);
 
@@ -324,18 +370,38 @@
                     // reveal surrounding zeros
                     traverseGridMap(coords)
                 }
-                e.target.removeEventListener('contextmenu', rclickCell)
-                if (e.target.getAttribute('data-bombs') === '0') {
-                    let coords = e.target.getAttribute('data-coords').split(',').map(i => parseInt(i))
-                    traverseGridMap(coords)
-                }
-                if (parseInt(e.target.getAttribute('data-bomb'))) {
-                    document.querySelectorAll('.cell').forEach(cell => {
-                        cell.innerText = parseInt(cell.getAttribute('data-bomb')) ? '💣' : cell.getAttribute('data-bombs')
-                        document.querySelector('main').classList.add('loser')
-                    })
+                if (bombTouch) {
+                    e.target.removeEventListener('contextmenu', rclickCell)
+                    if (e.target.getAttribute('data-bombs') === '0') {
+                        let coords = e.target.getAttribute('data-coords').split(',').map(i => parseInt(i))
+                        traverseGridMap(coords)
+                    }
+                    if (parseInt(e.target.getAttribute('data-bomb'))) {
+                        document.querySelectorAll('.cell').forEach(cell => {
+                            cell.innerText = parseInt(cell.getAttribute('data-bomb')) ? '💣' : cell.getAttribute('data-bombs')
+                            document.querySelector('main').classList.add('loser')
+                        })
+                    } else {
+                        e.target.innerText = e.target.getAttribute('data-bombs')
+                    }
                 } else {
-                    e.target.innerText = e.target.getAttribute('data-bombs')
+                    let cell = e.target.innerText === '🚩' ? e.target.parentNode : e.target
+                    const coords = cell.getAttribute('data-coords').split(',').join('')
+                    map = { ...map, [coords]: { ...map[coords], flagged: !map[coords].flagged } }
+
+                    if (parseInt(cell.getAttribute('data-flag'))) {
+                        cell.setAttribute('data-flag', 0)
+                        cell.addEventListener('click', clickCell)
+                        cell.innerHTML = '<span></span>'
+                        cell.classList.remove('flag')
+                    } else {
+                        cell.setAttribute('data-flag', 1)
+                        cell.innerHTML = '<span>🚩</span>'
+                        cell.removeEventListener('click', clickCell)
+                        cell.classList.add('flag')
+                    }
+                    checkWin()
+
                 }
             }
 
@@ -358,6 +424,14 @@
                 }
                 checkWin()
                 return false
+            }
+
+            function toggleTouchType(e) {
+                e.preventDefault()
+                const input = document.querySelector('#touchType');
+                input.checked = !input.checked
+                bombTouch = !bombTouch
+                document.querySelector('.touchType').classList.toggle('on')
             }
 
             function checkWin() {
