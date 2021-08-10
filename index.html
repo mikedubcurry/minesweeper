@@ -393,14 +393,16 @@
                     map = { ...map, [coords]: { ...map[coords], flagged: !map[coords].flagged } }
 
                     if (parseInt(cell.getAttribute('data-flag'))) {
+                        console.log('clicking flag');
                         cell.setAttribute('data-flag', 0)
-                        cell.addEventListener('click', clickCell)
+                        // cell.addEventListener('click', clickCell)
                         cell.innerHTML = '<span></span>'
                         cell.classList.remove('flag')
                     } else {
+                        console.log('planting flag');
                         cell.setAttribute('data-flag', 1)
                         cell.innerHTML = '<span>🚩</span>'
-                        cell.removeEventListener('click', clickCell)
+                        // cell.removeEventListener('click', clickCell)
                         cell.classList.add('flag')
                     }
                     checkWin()
