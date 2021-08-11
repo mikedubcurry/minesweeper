@@ -2,10 +2,24 @@
 	import Minefield from '$lib/Minefield.svelte';
 	import Cell from '$lib/Cell.svelte';
 	import Controls from '$lib/Controls.svelte';
+	import { genMines } from './lib/utils'
+	import type { Coords, CellProps } from './lib/types';
 
 	let gridSize = 5;
 	let mineCount: 3 | 15 | 25 = 3;
-	$: cells = Array(gridSize ** 2);
+	let cells: CellProps[] = []
+	$: {
+		cells = [];
+		for(let i = 0; i < gridSize**2; i++) {
+			cells.push({
+				coords: [(i % gridSize) + 1,Math.ceil((i + 1) / gridSize)],
+				flagged: false,
+				cell: 0,
+				bomb: false
+			})
+		}
+	}
+	
 	let difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 
 	function newGame() {
@@ -24,44 +38,15 @@
 				break;
 		}
 	}
-
-	function genMines(gridSize, mineCount, coords) {
-		let mines = [];
-		let cX = coords[0];
-		let cY = coords[1];
-		while (mineCount > 0) {
-			let randX = Math.floor(Math.random() * gridSize) + 1;
-			let randY = Math.floor(Math.random() * gridSize) + 1;
-			// make sure coords is a zero
-			// this probably has a much simpler refactored syntax...
-			if (cX !== randX && cY !== randY) {
-				// x, y is not bomb spot
-				if (cX - 1 !== randX && cY - 1 !== randY)
-					if (cX - 1 !== randX && cY !== randY)
-						if (cX !== randX && cY - 1 !== randY)
-							if (cX + 1 !== randX && cY + 1 !== randY)
-								if (cX !== randX && cY + 1 !== randY)
-									if (cX + 1 !== randX && cY !== randY)
-										if (!mines.map((m) => m.join('')).includes('' + randX + randY)) {
-											mines.push([randX, randY]);
-											mineCount--;
-										}
-			}
-		}
-		return mines;
-	}
-
-	let cell: Cell;
 </script>
 
 <main>
 	<Controls on:newGame={newGame} bind:difficulty />
 	<Minefield {gridSize}>
-		{#each cells as _, i}
+		{#each cells as cell, i}
 			<Cell
-				bind:this={cell}
-				cell={{ coords: `${(i % gridSize) + 1}${Math.ceil((i + 1) / gridSize)}` }}
-				on:cellClick={() => console.log(genMines(gridSize, mineCount, cell.getCoords()))}
+				{cell}
+				on:cellClick={() => console.log(genMines(gridSize, mineCount, cell.coords))}
 			/>
 		{/each}
 	</Minefield>

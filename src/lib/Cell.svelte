@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	export let cell: { coords: string; cell: number | '*'; flagged: boolean; bomb: boolean };
+	import type { CellProps, Coords } from './types';
+	export let cell: CellProps;
 
 	const dispatch = createEventDispatcher();
   
