@@ -12,11 +12,11 @@
 
 <div
 	on:click={() => {
-		console.log(cell)
+		console.log(cell);
 		dispatch('cellClick', cell);
 	}}
 	class="cell"
->{cell.bomb ? '💣' : cell.cell}</div>
+/>
 
 <style>
 	.cell {
@@ -29,7 +29,11 @@
 		align-items: center;
 	}
 
-	.cell:hover {
+	.cell:hover,
+	.cell:focus {
 		background-color: #aaa;
+	}
+	.cell:active {
+		background-color: #ddd;
 	}
 </style>
