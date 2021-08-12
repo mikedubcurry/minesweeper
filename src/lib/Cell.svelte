@@ -16,7 +16,7 @@
 		dispatch('cellClick', cell);
 	}}
 	class="cell"
->{cell.bomb ? '*' : cell.cell}</div>
+>{cell.bomb ? '💣' : cell.cell}</div>
 
 <style>
 	.cell {

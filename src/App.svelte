@@ -2,27 +2,15 @@
 	import Minefield from '$lib/Minefield.svelte';
 	import Cell from '$lib/Cell.svelte';
 	import Controls from '$lib/Controls.svelte';
-	import { generateMinesweeper, genMines, toCoords, toCoordString } from './lib/utils';
+	import { generateMinesweeper, genMines, toCoords, toCoordString, initCells } from './lib/utils';
 	import type { Coords, CellProps } from './lib/types';
 
 	let gridSize = 5;
-	let mineCount: 3 | 15 | 25 = 3;
-	let cells: CellProps[] = [];
-	$: {
-		// cells = [];
-		// for (let i = 0; i < gridSize ** 2; i++) {
-		// 	cells.push({
-		// 		coords: toCoords(gridSize, i),
-		// 		flagged: false,
-		// 		cell: 0,
-		// 		bomb: false,
-		// 	});
-		// }
-	}
-
+	let mineCount: 3 | 15 | 45 = 3;
+	let cells: CellProps[] = initCells(gridSize);
 	let playing = false;
-
 	let difficulty: 'easy' | 'medium' | 'hard' = 'easy';
+	let grid: ReturnType<typeof generateMinesweeper>;
 
 	function newGame() {
 		playing = false;
@@ -37,20 +25,11 @@
 				break;
 			case 'hard':
 				gridSize = 15;
-				mineCount = 25;
+				mineCount = 45;
 				break;
 		}
-		cells = [];
-		for (let i = 0; i < gridSize ** 2; i++) {
-			cells.push({
-				coords: toCoords(gridSize, i),
-				flagged: false,
-				cell: 0,
-				bomb: false,
-			});
-		}
+		cells = initCells(gridSize)
 	}
-	let grid: ReturnType<typeof generateMinesweeper>;
 	function handleCellClick(e: CustomEvent) {
 		let cell = e.detail as CellProps;
 		if (!playing) {
