@@ -4,19 +4,19 @@
 	export let cell: CellProps;
 
 	const dispatch = createEventDispatcher();
-  
-  export function getCoords() {
-    return cell.coords;
-  }
+
+	export function getCoords() {
+		return cell.coords;
+	}
 </script>
 
 <div
 	on:click={() => {
-		dispatch('cellClick');
-		console.log(cell);
+		console.log(cell)
+		dispatch('cellClick', cell);
 	}}
 	class="cell"
-/>
+>{cell.bomb ? '*' : cell.cell}</div>
 
 <style>
 	.cell {
@@ -24,6 +24,9 @@
 		height: 100%;
 		background-color: #ccc;
 		transition: background-color 0.3s ease;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.cell:hover {

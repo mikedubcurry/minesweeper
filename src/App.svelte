@@ -2,27 +2,30 @@
 	import Minefield from '$lib/Minefield.svelte';
 	import Cell from '$lib/Cell.svelte';
 	import Controls from '$lib/Controls.svelte';
-	import { genMines } from './lib/utils'
+	import { generateMinesweeper, genMines, toCoords, toCoordString } from './lib/utils';
 	import type { Coords, CellProps } from './lib/types';
 
 	let gridSize = 5;
 	let mineCount: 3 | 15 | 25 = 3;
-	let cells: CellProps[] = []
+	let cells: CellProps[] = [];
 	$: {
-		cells = [];
-		for(let i = 0; i < gridSize**2; i++) {
-			cells.push({
-				coords: [(i % gridSize) + 1,Math.ceil((i + 1) / gridSize)],
-				flagged: false,
-				cell: 0,
-				bomb: false
-			})
-		}
+		// cells = [];
+		// for (let i = 0; i < gridSize ** 2; i++) {
+		// 	cells.push({
+		// 		coords: toCoords(gridSize, i),
+		// 		flagged: false,
+		// 		cell: 0,
+		// 		bomb: false,
+		// 	});
+		// }
 	}
-	
+
+	let playing = false;
+
 	let difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 
 	function newGame() {
+		playing = false;
 		switch (difficulty) {
 			case 'easy':
 				gridSize = 5;
@@ -37,6 +40,31 @@
 				mineCount = 25;
 				break;
 		}
+		cells = [];
+		for (let i = 0; i < gridSize ** 2; i++) {
+			cells.push({
+				coords: toCoords(gridSize, i),
+				flagged: false,
+				cell: 0,
+				bomb: false,
+			});
+		}
+	}
+	let grid: ReturnType<typeof generateMinesweeper>;
+	function handleCellClick(e: CustomEvent) {
+		let cell = e.detail as CellProps;
+		if (!playing) {
+			// initialize game
+			playing = true;
+			// console.log(generateMinesweeper(gridSize, genMines(gridSize, mineCount, cell.coords)));
+			grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, cell.coords));
+			cells = cells.map((cell) => {
+				let coords = toCoordString(cell.coords);
+				return { ...cell, bomb: grid[coords] === -1, cell: grid[coords] };
+			});
+		} else {
+			// handle regular cell click
+		}
 	}
 </script>
 
@@ -44,10 +72,7 @@
 	<Controls on:newGame={newGame} bind:difficulty />
 	<Minefield {gridSize}>
 		{#each cells as cell, i}
-			<Cell
-				{cell}
-				on:cellClick={() => console.log(genMines(gridSize, mineCount, cell.coords))}
-			/>
+			<Cell {cell} on:cellClick={handleCellClick} />
 		{/each}
 	</Minefield>
 </main>
