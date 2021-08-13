@@ -13,13 +13,11 @@
 
 <div
 	on:click={() => {
-		console.log(cell);
-		dispatch('cellClick', cell);
+		if (!cell.flagged) dispatch('cellClick', cell);
 	}}
 	on:contextmenu={(e) => {
 		e.preventDefault();
-		console.log('flag');
-		dispatch('flagClick', cell);
+		if (!cell.show) dispatch('flagClick', cell);
 		return false;
 	}}
 	class="cell"
@@ -28,7 +26,7 @@
 	{#if cell.flagged}
 		<div transition:fly={{ y: -10, opacity: 0, duration: 200 }} class="flag">🚩</div>
 	{:else}
-		{cell.show ? cell.bomb ? '💣' : cell.cell : ''}
+		{cell.show ? (cell.bomb ? '💣' : cell.cell) : ''}
 	{/if}
 </div>
 
@@ -65,5 +63,4 @@
 	.cell:active {
 		background-color: #eff;
 	}
-
 </style>

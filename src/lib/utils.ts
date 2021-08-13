@@ -1,4 +1,4 @@
-import type { CellProps, Coords } from './types';
+import type { CellMap, CellProps, Coords } from './types';
 
 export function genMines(gridSize: number, mineCount: number, coords: Coords) {
 	let mines = [];
@@ -104,7 +104,7 @@ export function initCells(gridSize) {
 			flagged: false,
 			cell: 0,
 			bomb: false,
-			show: false
+			show: false,
 		});
 	}
 	return cells;
@@ -121,4 +121,79 @@ export function coordOffset(coordString: string, offsetX: number, offsetY: numbe
 
 export function toCoordString(coords: Coords) {
 	return coords.join(',');
+}
+
+export function gameOver(cells: CellProps[]) {
+	return cells.map((c) => ({ ...c, show: true }));
+}
+
+export function didWin(cells: CellProps[]) {
+	let flags = cells.filter((c) => c.flagged);
+	let bombs = cells.filter((c) => c.bomb);
+	if (flags.length === bombs.length) {
+		flags.forEach((cell, i) => {
+			if (toCoordString(cell.coords) !== toCoordString(bombs[i].coords)) {
+				return false;
+			}
+		});
+		return true;
+	}
+	return false;
+}
+
+export function revealSurroundingNums(cells: CellProps[], coords: Coords) {
+	let cellMap = cells.reduce((map, cell) => {
+		map[toCoordString(cell.coords)] = cell;
+		return map;
+	}, {} as CellMap);
+
+	let coordString = toCoordString(coords);
+
+	let offset = [-1, 0, 1];
+	// known zeros that need to be shown
+	let zeros: CellProps[] = [cellMap[coordString]];
+	// handled zeros to ignore
+	let handled: string[] = [];
+	// while there are zeros to deal with
+	while (zeros.length) {
+		offset.forEach((oX) => {
+			offset.forEach((oY) => {
+				// not the one we initially clicked on
+				if (oX !== 0 && oY !== 0) {
+					let offsetCoords = coordOffset(coordString, oX, oY);
+					// cell exists and is a zero
+					if (cellMap[offsetCoords] && cellMap[offsetCoords].cell === 0) {
+						zeros.push(cellMap[offsetCoords]);
+					}
+				}
+			});
+		});
+
+		// handle zeros
+		zeros.forEach((cell) => {
+			if (!handled.includes(toCoordString(cell.coords))) handled.push(toCoordString(cell.coords));
+			zeros = zeros.filter((c) => toCoordString(c.coords) !== toCoordString(cell.coords));
+			offset.forEach((oX) => {
+				offset.forEach((oY) => {
+					let offsetCoords = coordOffset(toCoordString(cell.coords), oX, oY);
+					// cell exists and is a zero
+					if (cellMap[offsetCoords] && cellMap[offsetCoords].cell === 0) {
+						if (!handled.includes(offsetCoords)) zeros.push(cellMap[offsetCoords]);
+					}
+				});
+			});
+		});
+	}
+
+	// still need to handle revealing cells adjacent to zeros...
+
+	cells = cells.map((cell) => {
+		if (handled.includes(toCoordString(cell.coords))) {
+			return { ...cell, show: true };
+		} else {
+			return cell;
+		}
+	});
+
+	return cells;
 }

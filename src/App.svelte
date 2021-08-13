@@ -2,7 +2,7 @@
 	import Minefield from '$lib/Minefield.svelte';
 	import Cell from '$lib/Cell.svelte';
 	import Controls from '$lib/Controls.svelte';
-	import { generateMinesweeper, genMines, toCoords, toCoordString, initCells } from './lib/utils';
+	import { generateMinesweeper, genMines, toCoords, toCoordString, initCells, gameOver, didWin, revealSurroundingNums } from './lib/utils';
 	import type { Coords, CellProps } from './lib/types';
 
 	let gridSize = 5;
@@ -37,19 +37,32 @@
 		if (!playing) {
 			// initialize game
 			playing = true;
-			// console.log(generateMinesweeper(gridSize, genMines(gridSize, mineCount, cell.coords)));
 			grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, cell.coords));
 			cells = cells.map((cell) => {
 				let coords = toCoordString(cell.coords);
 				return { ...cell, bomb: grid[coords] === -1, cell: grid[coords] };
 			});
+			// reveal adjacent 0s and border numbers
+			cells = revealSurroundingNums(cells, cell.coords)
 		} else {
 			// handle regular cell click
 			if (cell.bomb) {
-				console.log('game over');
 				gameState = 'gameover';
-				cells = cells.map(c => ({...c, show: true }))
+				cells = gameOver(cells);
 			} else {
+				// handle revealing bomb number(s)
+				if(cell.cell === 0) {
+					cells = revealSurroundingNums(cells, cell.coords)
+				} else {
+				let coordString = toCoordString(cell.coords);
+				cells = cells.map((c) => {
+					if (toCoordString(c.coords) === coordString) {
+						return { ...c, show: true };
+					} else {
+						return c;
+					}
+				});
+			}
 			}
 		}
 	}
@@ -63,6 +76,9 @@
 				return c;
 			}
 		});
+		if (didWin(cells)) {
+			gameState = 'win';
+		}
 	}
 </script>
 
