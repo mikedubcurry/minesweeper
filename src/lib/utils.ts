@@ -28,32 +28,6 @@ export function genMines(gridSize: number, mineCount: number, coords: Coords) {
 	return mines;
 }
 
-// export function traverseGridMap(coords, cells) {
-// 	let offset = [-1, 0, 1];
-// 	let coordX = coords[0];
-// 	let coordY = coords[1];
-// 	offset.forEach((x) => {
-// 		offset.forEach((y) => {
-// 			// make sure cell is in gridMap
-// 			if (cells['' + (coordX + x) + (coordY + y)]) {
-// 				if (!cells['' + (coordX + x) + (coordY + y)].checked && cells['' + (coordX + x) + (coordY + y)].cell !== '*') {
-// 					cells = {
-// 						...cells,
-// 						['' + (coordX + x) + (coordY + y)]: { ...cells[['' + (coordX + x) + (coordY + y)]], checked: true },
-// 					};
-// 					let cell = document.querySelector(`[data-coords='${'' + (coordX + x) + ',' + (coordY + y)}']`);
-// 					if (cell) {
-// 						cell.innerText =
-// 							cells['' + (coordX + x) + (coordY + y)].cell === 'x' ? 0 : cells['' + (coordX + x) + (coordY + y)].cell;
-// 						cell.removeEventListener('contextmenu', rclickCell);
-// 					}
-// 					if (cells['' + (coordX + x) + (coordY + y)].cell === 'x') traverseGridMap([coordX + x, coordY + y]);
-// 				}
-// 			}
-// 		});
-// 	});
-// }
-
 export function generateMinesweeper(gridSize: number, mines: Coords[]) {
 	const genGrid = (gridSize: number) => {
 		let grid = {};
@@ -131,12 +105,13 @@ export function didWin(cells: CellProps[]) {
 	let flags = cells.filter((c) => c.flagged);
 	let bombs = cells.filter((c) => c.bomb);
 	if (flags.length === bombs.length) {
+		let didWin = true;
 		flags.forEach((cell, i) => {
 			if (toCoordString(cell.coords) !== toCoordString(bombs[i].coords)) {
-				return false;
+				didWin = false;
 			}
 		});
-		return true;
+		return didWin;
 	}
 	return false;
 }
@@ -176,24 +151,25 @@ export function revealSurroundingNums(cells: CellProps[], coords: Coords) {
 			offset.forEach((oX) => {
 				offset.forEach((oY) => {
 					let offsetCoords = coordOffset(toCoordString(cell.coords), oX, oY);
-					// cell exists and is a zero
-					if (cellMap[offsetCoords] && cellMap[offsetCoords].cell === 0) {
-						if (!handled.includes(offsetCoords)) zeros.push(cellMap[offsetCoords]);
+					if (cellMap[offsetCoords]) {
+						// cell exists and is a zero
+						if (cellMap[offsetCoords].cell === 0) {
+							if (!handled.includes(offsetCoords)) zeros.push(cellMap[offsetCoords]);
+						} else {
+							// cell is around a zero
+							handled.push(offsetCoords);
+						}
 					}
 				});
 			});
 		});
 	}
 
-	// still need to handle revealing cells adjacent to zeros...
-
-	cells = cells.map((cell) => {
+	return cells.map((cell) => {
 		if (handled.includes(toCoordString(cell.coords))) {
 			return { ...cell, show: true };
 		} else {
 			return cell;
 		}
 	});
-
-	return cells;
 }

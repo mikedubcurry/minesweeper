@@ -2,7 +2,15 @@
 	import Minefield from '$lib/Minefield.svelte';
 	import Cell from '$lib/Cell.svelte';
 	import Controls from '$lib/Controls.svelte';
-	import { generateMinesweeper, genMines, toCoords, toCoordString, initCells, gameOver, didWin, revealSurroundingNums } from './lib/utils';
+	import {
+		generateMinesweeper,
+		genMines,
+		toCoordString,
+		initCells,
+		gameOver,
+		didWin,
+		revealSurroundingNums,
+	} from './lib/utils';
 	import type { Coords, CellProps } from './lib/types';
 
 	let gridSize = 5;
@@ -43,7 +51,7 @@
 				return { ...cell, bomb: grid[coords] === -1, cell: grid[coords] };
 			});
 			// reveal adjacent 0s and border numbers
-			cells = revealSurroundingNums(cells, cell.coords)
+			cells = revealSurroundingNums(cells, cell.coords);
 		} else {
 			// handle regular cell click
 			if (cell.bomb) {
@@ -51,23 +59,26 @@
 				cells = gameOver(cells);
 			} else {
 				// handle revealing bomb number(s)
-				if(cell.cell === 0) {
-					cells = revealSurroundingNums(cells, cell.coords)
+				if (cell.cell === 0) {
+					cells = revealSurroundingNums(cells, cell.coords);
 				} else {
-				let coordString = toCoordString(cell.coords);
-				cells = cells.map((c) => {
-					if (toCoordString(c.coords) === coordString) {
-						return { ...c, show: true };
-					} else {
-						return c;
-					}
-				});
-			}
+					let coordString = toCoordString(cell.coords);
+					cells = cells.map((c) => {
+						if (toCoordString(c.coords) === coordString) {
+							return { ...c, show: true };
+						} else {
+							return c;
+						}
+					});
+				}
 			}
 		}
 	}
 
 	function handleFlagClick(e: CustomEvent) {
+		// dont plant a flag if game hasnt started
+		if (!playing) return;
+
 		let cell = e.detail as CellProps;
 		cells = cells.map((c) => {
 			if (toCoordString(c.coords) === toCoordString(cell.coords)) {

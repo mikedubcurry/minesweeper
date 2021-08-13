@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
-	import type { CellProps, Coords } from './types';
-	export let cell: CellProps;
+	import { fly } from 'svelte/transition';
+	import type { CellProps } from './types';
 
+	export let cell: CellProps;
 	const dispatch = createEventDispatcher();
 
 	export function getCoords() {
@@ -40,6 +40,7 @@
 		justify-content: center;
 		align-items: center;
 		position: relative;
+		font-size: 12px;
 	}
 
 	.cell.cell.flagged {
