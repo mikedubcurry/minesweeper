@@ -1,4 +1,4 @@
-import type { Coords } from './types';
+import type { CellProps, Coords } from './types';
 
 export function genMines(gridSize: number, mineCount: number, coords: Coords) {
 	let mines = [];
@@ -27,6 +27,32 @@ export function genMines(gridSize: number, mineCount: number, coords: Coords) {
 
 	return mines;
 }
+
+// export function traverseGridMap(coords, cells) {
+// 	let offset = [-1, 0, 1];
+// 	let coordX = coords[0];
+// 	let coordY = coords[1];
+// 	offset.forEach((x) => {
+// 		offset.forEach((y) => {
+// 			// make sure cell is in gridMap
+// 			if (cells['' + (coordX + x) + (coordY + y)]) {
+// 				if (!cells['' + (coordX + x) + (coordY + y)].checked && cells['' + (coordX + x) + (coordY + y)].cell !== '*') {
+// 					cells = {
+// 						...cells,
+// 						['' + (coordX + x) + (coordY + y)]: { ...cells[['' + (coordX + x) + (coordY + y)]], checked: true },
+// 					};
+// 					let cell = document.querySelector(`[data-coords='${'' + (coordX + x) + ',' + (coordY + y)}']`);
+// 					if (cell) {
+// 						cell.innerText =
+// 							cells['' + (coordX + x) + (coordY + y)].cell === 'x' ? 0 : cells['' + (coordX + x) + (coordY + y)].cell;
+// 						cell.removeEventListener('contextmenu', rclickCell);
+// 					}
+// 					if (cells['' + (coordX + x) + (coordY + y)].cell === 'x') traverseGridMap([coordX + x, coordY + y]);
+// 				}
+// 			}
+// 		});
+// 	});
+// }
 
 export function generateMinesweeper(gridSize: number, mines: Coords[]) {
 	const genGrid = (gridSize: number) => {
@@ -71,13 +97,14 @@ export function generateMinesweeper(gridSize: number, mines: Coords[]) {
 }
 
 export function initCells(gridSize) {
-	let cells = [];
+	let cells: CellProps[] = [];
 	for (let i = 0; i < gridSize ** 2; i++) {
 		cells.push({
 			coords: toCoords(gridSize, i),
 			flagged: false,
 			cell: 0,
 			bomb: false,
+			show: false
 		});
 	}
 	return cells;

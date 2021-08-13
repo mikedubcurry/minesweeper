@@ -11,8 +11,10 @@
 	let playing = false;
 	let difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 	let grid: ReturnType<typeof generateMinesweeper>;
+	let gameState: 'gameover' | 'win' | undefined;
 
 	function newGame() {
+		gameState = undefined;
 		playing = false;
 		switch (difficulty) {
 			case 'easy':
@@ -28,7 +30,7 @@
 				mineCount = 45;
 				break;
 		}
-		cells = initCells(gridSize)
+		cells = initCells(gridSize);
 	}
 	function handleCellClick(e: CustomEvent) {
 		let cell = e.detail as CellProps;
@@ -43,15 +45,32 @@
 			});
 		} else {
 			// handle regular cell click
+			if (cell.bomb) {
+				console.log('game over');
+				gameState = 'gameover';
+				cells = cells.map(c => ({...c, show: true }))
+			} else {
+			}
 		}
+	}
+
+	function handleFlagClick(e: CustomEvent) {
+		let cell = e.detail as CellProps;
+		cells = cells.map((c) => {
+			if (toCoordString(c.coords) === toCoordString(cell.coords)) {
+				return { ...c, flagged: !c.flagged };
+			} else {
+				return c;
+			}
+		});
 	}
 </script>
 
-<main>
+<main class:gameover={gameState === 'gameover'} class:win={gameState === 'win'}>
 	<Controls on:newGame={newGame} bind:difficulty />
 	<Minefield {gridSize}>
 		{#each cells as cell, i}
-			<Cell {cell} on:cellClick={handleCellClick} />
+			<Cell {cell} on:cellClick={handleCellClick} on:flagClick={handleFlagClick} />
 		{/each}
 	</Minefield>
 </main>
@@ -75,6 +94,22 @@
 		flex-direction: column;
 		justify-content: space-around;
 		align-items: center;
+		background-color: lightblue;
+		transition: all 0.3s;
+	}
+
+	main.gameover {
+		background-color: orangered;
+	}
+
+	main.win {
+		animation: winner 3s linear;
+	}
+
+	@keyframes winner {
+		to {
+			filter: hue-rotate(1080deg);
+		}
 	}
 
 	@media (min-width: 480px) {
