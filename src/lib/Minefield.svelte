@@ -8,10 +8,19 @@
 
 <style>
 	.minefield {
-		width: 480px;
-		height: 480px;
+		width: calc(100vw - 32px);
+		height: calc(100vw - 32px);
 		display: grid;
 		grid-template-columns: repeat(var(--grid-size), 1fr);
-		gap: 8px;
+		grid-auto-rows: 1fr;
+		gap: 2px;
+		/* margin: 16px; */
+	}
+
+	@media screen and (min-width: 500px) {
+		.minefield {
+			width:  500px;
+			height: 500px ;
+		}
 	}
 </style>
