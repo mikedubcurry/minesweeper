@@ -12,3 +12,8 @@
 </select>
 
 <button on:click={() => dispatch('newGame')}>New Game</button>
+
+
+<style>
+	
+</style>

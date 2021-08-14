@@ -24,7 +24,13 @@
 	class:flagged={cell.flagged}
 >
 	{#if cell.flagged}
-		<div transition:fly={{ y: -10, opacity: 0, duration: 200 }} class="flag">🚩</div>
+		<div
+			class:wrong={cell.flagged && cell.show && !cell.bomb}
+			transition:fly={{ y: -10, opacity: 0, duration: 200 }}
+			class="flag"
+		>
+			🚩
+		</div>
 	{:else}
 		{cell.show ? (cell.bomb ? '💣' : cell.cell) : ''}
 	{/if}
@@ -56,6 +62,10 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+	}
+
+	.wrong {
+		background-color: purple;
 	}
 
 	.cell:hover {
