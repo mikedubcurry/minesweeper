@@ -9,6 +9,22 @@
 	export function getCoords() {
 		return cell.coords;
 	}
+
+	function handleTouch() {
+		if (!moved) {
+			if (t < 150) {
+				if (!cell.flagged) dispatch('cellClick', cell);
+			} else {
+				if (!cell.show) dispatch('flagClick', cell);
+			}
+		}
+
+		moved = false;
+		t = 0;
+	}
+
+	let t: number = 0;
+	let moved: boolean = false;
 </script>
 
 <div
@@ -19,6 +35,20 @@
 		e.preventDefault();
 		if (!cell.show) dispatch('flagClick', cell);
 		return false;
+	}}
+	on:touchstart={(e) => {
+		e.preventDefault();
+		t = -e.timeStamp;
+	}}
+	on:touchmove={(e) => {
+		e.preventDefault();
+		moved = true;
+		t = 0;
+	}}
+	on:touchend={(e) => {
+		e.preventDefault();
+		t += e.timeStamp;
+		handleTouch();
 	}}
 	class="cell"
 	class:flagged={cell.flagged}
