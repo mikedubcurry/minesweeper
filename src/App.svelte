@@ -14,12 +14,13 @@
 	import type { Coords, CellProps } from './lib/types';
 
 	let gridSize = 5;
-	let mineCount: 3 | 15 | 45 = 3;
+	let mineCount: 3 | 15 | 30 = 3;
 	let cells: CellProps[] = initCells(gridSize);
 	let playing = false;
 	let difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 	let grid: ReturnType<typeof generateMinesweeper>;
 	let gameState: 'gameover' | 'win' | undefined;
+	let hard = false;
 
 	function newGame() {
 		gameState = undefined;
@@ -28,24 +29,27 @@
 			case 'easy':
 				gridSize = 5;
 				mineCount = 3;
+				hard = false;
 				break;
 			case 'medium':
 				gridSize = 10;
 				mineCount = 15;
+				hard = false;
 				break;
 			case 'hard':
-				gridSize = 15;
-				mineCount = 45;
+				gridSize = 10;
+				mineCount = 30;
+				hard = true;
 				break;
 		}
-		cells = initCells(gridSize);
+		cells = initCells(gridSize, hard);
 	}
 	function handleCellClick(e: CustomEvent) {
 		let cell = e.detail as CellProps;
 		if (!playing) {
 			// initialize game
 			playing = true;
-			grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, cell.coords));
+			grid = generateMinesweeper(gridSize, genMines(gridSize, mineCount, cell.coords, hard), hard);
 			cells = cells.map((cell) => {
 				let coords = toCoordString(cell.coords);
 				return { ...cell, bomb: grid[coords] === -1, cell: grid[coords] };
@@ -95,11 +99,16 @@
 
 <main class:gameover={gameState === 'gameover'} class:win={gameState === 'win'}>
 	<Controls on:newGame={newGame} bind:difficulty />
-	<Minefield {gridSize}>
+	<Minefield {gridSize} {hard}>
 		{#each cells as cell, i}
 			<Cell {cell} on:cellClick={handleCellClick} on:flagClick={handleFlagClick} />
 		{/each}
 	</Minefield>
+
+	<div class="rules">
+		<p>Left-Click or tap to check a cell. Right-Click or long press to plant or remove a flag.</p>
+		<p>You win when all bombs are flagged!</p>
+	</div>
 </main>
 
 <style>
@@ -123,6 +132,10 @@
 		align-items: center;
 		background-color: lightblue;
 		transition: all 0.3s;
+	}
+
+	.rules {
+		text-align: center;
 	}
 
 	main.gameover {

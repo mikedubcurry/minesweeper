@@ -1,12 +1,12 @@
 import type { CellMap, CellProps, Coords } from './types';
 
-export function genMines(gridSize: number, mineCount: number, coords: Coords) {
+export function genMines(gridSize: number, mineCount: number, coords: Coords, hard: boolean = false) {
 	let mines = [];
 	let cX = coords[0];
 	let cY = coords[1];
 	while (mineCount > 0) {
 		let randX = Math.floor(Math.random() * gridSize) + 1;
-		let randY = Math.floor(Math.random() * gridSize) + 1;
+		let randY = hard ? Math.floor(Math.random() * (gridSize + 3)) + 1 : Math.floor(Math.random() * gridSize) + 1;
 		if (
 			(randX !== cX || randY !== cY - 1) &&
 			(randX !== cX || randY !== cY) &&
@@ -28,10 +28,10 @@ export function genMines(gridSize: number, mineCount: number, coords: Coords) {
 	return mines;
 }
 
-export function generateMinesweeper(gridSize: number, mines: Coords[]) {
-	const genGrid = (gridSize: number) => {
+export function generateMinesweeper(gridSize: number, mines: Coords[], hard: boolean = false) {
+	const genGrid = (gridSize: number, hard: boolean) => {
 		let grid = {};
-		for (let i = 0; i < gridSize ** 2; i++) {
+		for (let i = 0; hard ? i < gridSize ** 2 + gridSize * 3 : i < gridSize ** 2; i++) {
 			let coords = toCoords(gridSize, i);
 			let coordsString = toCoordString(coords);
 			let isMine = mines.filter((m) => m.join(',') === coordsString).length;
@@ -46,7 +46,7 @@ export function generateMinesweeper(gridSize: number, mines: Coords[]) {
 		return grid;
 	};
 
-	let grid = genGrid(gridSize);
+	let grid = genGrid(gridSize, hard);
 
 	Object.keys(grid).forEach((coord) => {
 		if (grid[coord] < 0) {
@@ -56,7 +56,10 @@ export function generateMinesweeper(gridSize: number, mines: Coords[]) {
 				offset.forEach((oY) => {
 					// double loop over offsets to set numbers around each mine
 					let offsetCoord = coordOffset(coord, oX, oY);
-					if (!offsetCoord.split(',').includes('0') && offsetCoord.indexOf((gridSize + 1).toString()) < 0) {
+					if (
+						!offsetCoord.split(',').includes('0') &&
+						offsetCoord.indexOf((hard ? gridSize * 3 + 1 : gridSize + 1).toString()) < 0
+					) {
 						// only check offsets within bounds of grid
 						if (grid[offsetCoord] > -1) {
 							grid[offsetCoord] += 1;
@@ -70,16 +73,28 @@ export function generateMinesweeper(gridSize: number, mines: Coords[]) {
 	return grid;
 }
 
-export function initCells(gridSize) {
+export function initCells(gridSize: number, hard: boolean = false) {
 	let cells: CellProps[] = [];
-	for (let i = 0; i < gridSize ** 2; i++) {
-		cells.push({
-			coords: toCoords(gridSize, i),
-			flagged: false,
-			cell: 0,
-			bomb: false,
-			show: false,
-		});
+	if (hard) {
+		for (let i = 0; i < gridSize ** 2 + gridSize * 3; i++) {
+			cells.push({
+				coords: toCoords(gridSize, i),
+				flagged: false,
+				cell: 0,
+				bomb: false,
+				show: false,
+			});
+		}
+	} else {
+		for (let i = 0; i < gridSize ** 2; i++) {
+			cells.push({
+				coords: toCoords(gridSize, i),
+				flagged: false,
+				cell: 0,
+				bomb: false,
+				show: false,
+			});
+		}
 	}
 	return cells;
 }
