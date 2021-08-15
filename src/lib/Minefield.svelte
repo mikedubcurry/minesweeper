@@ -23,7 +23,7 @@
 	@media screen and (min-width: 500px) {
 		.minefield {
 			width: 500px;
-			height: calc(500px * 1.3);
+			height: calc(500px * var(--ratio));
 		}
 	}
 </style>

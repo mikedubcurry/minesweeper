@@ -2,6 +2,7 @@
 	import Minefield from '$lib/Minefield.svelte';
 	import Cell from '$lib/Cell.svelte';
 	import Controls from '$lib/Controls.svelte';
+	import { portal } from './lib/portal';
 	import {
 		generateMinesweeper,
 		genMines,
@@ -12,6 +13,7 @@
 		revealSurroundingNums,
 	} from './lib/utils';
 	import type { Coords, CellProps } from './lib/types';
+import Rules from './lib/Rules.svelte';
 
 	let gridSize = 5;
 	let mineCount: 3 | 15 | 30 = 3;
@@ -21,6 +23,7 @@
 	let grid: ReturnType<typeof generateMinesweeper>;
 	let gameState: 'gameover' | 'win' | undefined;
 	let hard = false;
+	let rulesVisible = false;
 
 	function newGame() {
 		gameState = undefined;
@@ -98,17 +101,15 @@
 </script>
 
 <main class:gameover={gameState === 'gameover'} class:win={gameState === 'win'}>
-	<Controls on:newGame={newGame} bind:difficulty />
+	<Controls on:newGame={newGame} on:rulesVisible={() => (rulesVisible = true)} bind:difficulty />
+	{#if rulesVisible}
+		<Rules on:rulesClose={() => rulesVisible = false}/>
+	{/if}
 	<Minefield {gridSize} {hard}>
 		{#each cells as cell, i}
 			<Cell {cell} on:cellClick={handleCellClick} on:flagClick={handleFlagClick} />
 		{/each}
 	</Minefield>
-
-	<div class="rules">
-		<p>Left-Click or tap to check a cell. Right-Click or long press to plant or remove a flag.</p>
-		<p>You win when all bombs are flagged!</p>
-	</div>
 </main>
 
 <style>
@@ -134,9 +135,7 @@
 		transition: all 0.3s;
 	}
 
-	.rules {
-		text-align: center;
-	}
+
 
 	main.gameover {
 		background-color: orangered;

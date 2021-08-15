@@ -6,7 +6,8 @@
 </script>
 
 <section>
-	<button on:click={() => dispatch('newGame')}>New Game</button>
+	<button class="newgame" on:click={() => dispatch('newGame')}>New Game</button>
+	<button on:click={() => dispatch('rulesVisible')}>View Rules</button>
 	<select bind:value={difficulty} name="difficulty" id="difficulty">
 		<option value="easy">Easy</option>
 		<option value="medium">Medium</option>
@@ -17,17 +18,23 @@
 <style>
 	section {
 		display: flex;
-		flex-direction: column;
+		/* flex-direction: column; */
 		justify-content: space-between;
+		align-items: center;
+		width: 300px;
 		height: 80px;
 	}
 	button {
 		padding: 6px 14px;
 		border-radius: 8px;
 		border: none;
-		background-color: lightgreen;
+		background-color: lightpink;
 		filter: brightness(100%) drop-shadow(0 3px 4px #555);
 		transition: filter 0.2s ease;
+	}
+	.newgame {
+		background-color: lightgreen;
+
 	}
 	button:hover {
 		filter: brightness(110%) drop-shadow(0 5px 5px #444);
